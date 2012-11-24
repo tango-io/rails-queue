@@ -1,0 +1,213 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Rails-queue by probablywrong</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Rails-queue</h1>
+        <p>Rails.queue (from Rails 4) backported to Rails 3.2+</p>
+        <p class="view"><a href="https://github.com/probablywrong/rails-queue">View the Project on GitHub <small>probablywrong/rails-queue</small></a></p>
+        <ul>
+          <li><a href="https://github.com/probablywrong/rails-queue/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/probablywrong/rails-queue/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/probablywrong/rails-queue">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>rails-queue</h1>
+
+<p><a href="https://travis-ci.org/probablywrong/rails-queue"><img src="https://secure.travis-ci.org/probablywrong/rails-queue.png" alt="Build Status"></a></p>
+
+<h2>Description</h2>
+
+<p>It's the <code>Rails.queue</code> <a href="https://github.com/rails/rails/blob/master/activesupport/lib/active_support/queueing.rb">from Rails 4</a>, backported to Rails 3.2+ for your Queueing pleasure.</p>
+
+<blockquote>
+<p><code>Rails.queue</code> is the application's queue. You can push a job onto the queue by:</p>
+
+<pre><code>Rails.queue.push job
+</code></pre>
+
+<p>A job is an object that responds to <code>#run</code>. Queue consumers will pop jobs off of the queue and invoke the queue's <code>run</code> method.</p>
+
+<p>Note that depending on your queue implementation, jobs may not be executed in the same process as they were created in, and are never executed in the same thread as they were created in.</p>
+
+<p>If necessary, a queue implementation may need to serialize your job for distribution to another process. The documentation of your queue will specify the requirements for that serialization</p>
+</blockquote>
+
+<h2>Requirements</h2>
+
+<p>This gem requires Rails 3.2+ and has been tested on the following versions:</p>
+
+<ul>
+<li>3.2.8</li>
+<li>3.2.9</li>
+</ul><p>This gem has been tested against the following Ruby versions:</p>
+
+<ul>
+<li>1.9.2</li>
+<li>1.9.3</li>
+</ul><h2>Installation</h2>
+
+<p>Add this line to your application's Gemfile:</p>
+
+<div class="highlight"><pre><span class="n">gem</span> <span class="s2">"rails-queue"</span>
+</pre></div>
+
+<p>And then execute:</p>
+
+<pre><code>$ bundle
+</code></pre>
+
+<p>Or install it yourself as:</p>
+
+<pre><code>$ gem install rails-queue
+</code></pre>
+
+<h2>Usage</h2>
+
+<p>The following queueing strategies are provided by default:</p>
+
+<ul>
+<li><code>SynchronousQueue</code></li>
+<li><code>TestQueue</code></li>
+</ul><p>The following queue consumer strategies are provided by default:</p>
+
+<ul>
+<li><code>ThreadedQueueConsumer</code></li>
+</ul><p>The threaded consumer will run jobs in a background thread in development mode or in a VM where running jobs on a thread in production mode makes sense.</p>
+
+<p>When the process exits, the consumer pushes a <code>nil</code> onto the queue and joins the thread, which will ensure that all jobs are executed before the process finally dies.</p>
+
+<p><em>Note: In this port, classes that live under the <code>ActiveSupport::</code> namespace in Rails 4 have been moved to the <code>Rails::Queue::</code> namespace.</em></p>
+
+<h3>Configuration</h3>
+
+<p>Rails will now have the following options available:</p>
+
+<ul>
+<li><code>config.queue</code></li>
+<li><code>config.queue_consumer</code></li>
+<li><code>config.action_mailer.queue</code></li>
+</ul><p>These can be customized in <code>config/application.rb</code> or by environment:</p>
+
+<div class="highlight"><pre><span class="c1"># config/environments/production.rb</span>
+
+<span class="c1"># Default the production mode queue to an synchronous queue. You will probably</span>
+<span class="c1"># want to replace this with an out-of-process queueing solution.</span>
+<span class="n">config</span><span class="o">.</span><span class="n">queue</span> <span class="o">=</span> <span class="no">Rails</span><span class="o">::</span><span class="no">Queue</span><span class="o">::</span><span class="no">SynchronousQueue</span><span class="o">.</span><span class="n">new</span>
+
+<span class="c1"># You will probably want to change the job queue consumer from the default.</span>
+<span class="n">config</span><span class="o">.</span><span class="n">queue_consumer</span> <span class="o">=</span> <span class="no">Rails</span><span class="o">::</span><span class="no">Queue</span><span class="o">::</span><span class="no">ThreadedQueueConsumer</span><span class="o">.</span><span class="n">new</span>
+</pre></div>
+
+<h3>ActionMailer</h3>
+
+<p>Mail delivery from ActionMailer can be processed asynchronously using the Rails.queue.</p>
+
+<p>By default, ActionMailer will use the application default Rails.queue strategy. This can be configured:</p>
+
+<div class="highlight"><pre><span class="c1"># The queue that will be used to deliver the mail. The queue should expect a job</span>
+<span class="c1"># that responds to run.</span>
+<span class="n">config</span><span class="o">.</span><span class="n">action_mailer</span><span class="o">.</span><span class="n">queue</span> <span class="o">=</span> <span class="no">Rails</span><span class="o">::</span><span class="no">Queue</span><span class="o">::</span><span class="no">SynchronousQueue</span><span class="o">.</span><span class="n">new</span>
+</pre></div>
+
+<h3>Testing</h3>
+
+<p>In test mode, the Rails queue is backed by an Array so that assertions can be made about its contents. The test queue provides a <code>jobs</code> method to make assertions about the queue's contents and a <code>drain</code> method to drain the queue and run the jobs.</p>
+
+<p>Jobs are run in a separate thread to catch mistakes where code assumes that the job is run in the same thread.</p>
+
+<div class="highlight"><pre><span class="c1"># config/environments/test.rb</span>
+
+<span class="n">config</span><span class="o">.</span><span class="n">queue</span> <span class="o">=</span> <span class="no">Rails</span><span class="o">::</span><span class="no">Queue</span><span class="o">::</span><span class="no">TestQueue</span><span class="o">.</span><span class="n">new</span>
+</pre></div>
+
+<h3>Alternate Providers</h3>
+
+<p>The Rails Queue implementation is designed to be pluggable and you may want to investigate other queue providers, such as:</p>
+
+<ul>
+<li><a href="https://github.com/jeremy/resque-rails">resque-rails</a></li>
+<li><a href="https://github.com/mperham/sidekiq/tree/rails4">Sidekiq</a></li>
+</ul><h2>Resources</h2>
+
+<p>The following are some resources from around the Internet which introduce the Rails Queue:</p>
+
+<p><em>Note: Many of these are, or will be soon, out of date.</em></p>
+
+<ul>
+<li><a href="http://edgeguides.rubyonrails.org/4_0_release_notes.html">Ruby on Rails 4.0 Release Notes</a></li>
+<li><a href="http://reefpoints.dockyard.com/ruby/2012/06/25/rails-4-sneak-peek-queueing.html">Rails 4.0 Sneak Peek: Queueing</a></li>
+<li><a href="http://www.3magine.com/blog/new-in-rails-4-0-rails-queue/">New in Rails 4.0: Rails Queue</a></li>
+</ul><h2>A note on spelling</h2>
+
+<p>Yes, there are two spelling options. We defer to research provided by <a href="http://xkcd.com/853/">XKCD</a>.</p>
+
+<h2>Authors</h2>
+
+<p>This was written/extracted as part of an ongoing yak-shave known as "We're Probably Wrong", a production of:</p>
+
+<ul>
+<li>
+<a href="https://github.com/elskwid">@elskwid</a> <a href="http://coderwall.com/elskwid"><img src="http://api.coderwall.com/elskwid/endorsecount.png" alt="endorse"></a>
+</li>
+<li>
+<a href="https://github.com/phlipper">@phlipper</a> <a href="http://coderwall.com/phlipper"><img src="http://api.coderwall.com/phlipper/endorsecount.png" alt="endorse"></a>
+</li>
+</ul><h2>Contributors</h2>
+
+<p>Many thanks go to the following who have contributed to making this gem even better:</p>
+
+<ul>
+<li>
+<strong><a href="https://github.com/rails">@rails</a></strong>
+
+<ul>
+<li>for making this all possible in the first place</li>
+</ul>
+</li>
+</ul><h2>Contributing</h2>
+
+<ol>
+<li><a href="https://github.com/phlipper/rails-four-queueing/fork_select">Fork it</a></li>
+<li>Create your feature branch (<code>git checkout -b my-new-feature</code>)</li>
+<li>Commit your changes (<code>git commit -am 'Added some feature'</code>)</li>
+<li>Push to the branch (<code>git push origin my-new-feature</code>)</li>
+<li><a>Create a Pull Request</a></li>
+</ol><h2>License</h2>
+
+<p><strong>rails-queue</strong></p>
+
+<ul>
+<li>Freely distributable and licensed under the <a href="http://probablywrong.mit-license.org/2012/license.html">MIT license</a>.</li>
+<li>Copyright (c) 2012 We're Probably Wrong (<a href="mailto:github@wereprobablywrong.com">github@wereprobablywrong.com</a>)</li>
+<li><a href="http://wereprobablywrong.com/">http://wereprobablywrong.com/</a></li>
+</ul><p><strong>rails</strong></p>
+
+<ul>
+<li>Ruby on Rails is released under the <a href="http://www.opensource.org/licenses/MIT">MIT License</a>.</li>
+</ul>
+      </section>
+    </div>
+    <footer>
+      <p>Project maintained by <a href="https://github.com/probablywrong">probablywrong</a></p>
+      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
+    </footer>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  </body>
+</html>
