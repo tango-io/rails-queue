@@ -1,6 +1,6 @@
 # rails-queue
 
-[![Build Status](https://secure.travis-ci.org/probablywrong/rails-queue.png)](https://travis-ci.org/probablywrong/rails-queue)
+[![Build Status](https://secure.travis-ci.org/probablywrong/rails-queue.png)](https://travis-ci.org/probablywrong/rails-queue) [![Code Climate](https://codeclimate.com/badge.png)](https://codeclimate.com/github/probablywrong/rails-queue)
 
 ## Description
 
@@ -159,11 +159,11 @@ Many thanks go to the following who have contributed to making this gem even bet
 
 ## Contributing
 
-1. [Fork it](https://github.com/phlipper/rails-four-queueing/fork_select)
+1. [Fork it](https://github.com/probablywrong/rails-queue/fork_select)
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Added some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
-5. [Create a Pull Request](hhttps://github.com/phlipper/rails-four-queueing/pull/new)
+5. [Create a Pull Request](hhttps://github.com/probablywrong/rails-queue/pull/new)
 
 
 ## License
