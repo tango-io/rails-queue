@@ -1,0 +1,11 @@
+language: ruby
+rvm:
+  - 1.9.2
+  - 1.9.3
+env:
+  - CI=true RAILS_VERSION=3.2.8
+  - CI=true RAILS_VERSION=3.2.9
+before_script: ./test/ci/before_script.sh
+script: bundle exec rake test
+notifications:
+  flowdock: 2c585c5c5c34b61cf1de922735bcf327
